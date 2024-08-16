@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html style="overflow: scroll;">
+<head>
+  <meta charset="utf-8">
+  <meta name="description"
+        content="CrossSpeech++: Cross-lingual Speech Synthesis with Disentangled Acoustic Representations">
+  <!-- <meta name="keywords" content="FreGrad, speech synthesis, vocoder, lightweight model, diffusion, fast diffusion"> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CrossSpeech++</title>
+
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-PYVRSFMDRL"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+
+    function gtag() {
+      dataLayer.push(arguments);
+    }
+
+    gtag('js', new Date());
+
+    gtag('config', 'G-PYVRSFMDRL');
+  </script>
+
+  <link href="https://fonts.googleapis.com/css?family=Google+Sans|Noto+Sans|Castoro"
+        rel="stylesheet">
+
+  <link rel="stylesheet" href="./static/css/bulma.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-carousel.min.css">
+  <link rel="stylesheet" href="./static/css/bulma-slider.min.css">
+  <link rel="stylesheet" href="./static/css/fontawesome.all.min.css">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/jpswalsh/academicons@1/css/academicons.min.css">
+  <link rel="stylesheet" href="./static/css/index.css">
+  <!-- <link rel="icon" href="./static/images/favicon.ico"> -->
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script defer src="./static/js/fontawesome.all.min.js"></script>
+  <script src="./static/js/bulma-carousel.min.js"></script>
+  <script src="./static/js/bulma-slider.min.js"></script>
+  <script src="./static/js/index.js"></script>
+  <script type="text/x-mathjax-config">
+    MathJax.Hub.Config({            
+        tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}            
+    });
+  </script>
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-MML-AM_CHTML' async>
+  </script>
+</head>
+<body>
+
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a role="button" class="navbar-burger" aria-label="menu" aria-expanded="false">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+  <div class="navbar-menu">
+    <div class="navbar-start" style="flex-grow: 1; justify-content: center;">
+      <!-- Comment for anonymous -->
+      <a class="navbar-item" href="https://mm.kaist.ac.kr/">
+      <span class="icon">
+          <i class="fas fa-home"></i>
+      </span>
+      </a>
+
+    </div>
+
+  </div>
+</nav>
+
+
+<section class="hero">
+  <div class="hero-body">
+    <div class="container is-max-desktop">
+      <div class="columns is-centered">
+        <div class="column has-text-centered">
+          <h1 class="title is-1 publication-title">CrossSpeech++: Cross-lingual Speech Synthesis with Disentangled Acoustic Representations</h1>
+          <div class="is-size-5 publication-authors">
+              <a href="https://sites.google.com/view/jhoonkim/">Ji-Hoon Kim<sup>1</sup></a>,
+              </span>
+            <span class="author-block">
+              Hong-Sun Yang<sup>2</sup>,
+            </span>
+            <span class="author-block">
+              Yoon-Cheol Ju<sup>2</sup>,
+            </span>
+            <span class="author-block">
+              Il-Hwan Kim<sup>2</sup>,
+            </span>
+            <span class="author-block">
+              Byeong-Yeol Kim<sup>2</sup>,
+            </span>
+            <span class="author-block">
+              <a href="https://mmai.io/joon/">Joon Son Chung<sup>1</sup></a>
+            </span>
+          </div>
+          <br>
+
+          <div class="is-size-5 publication-authors">
+            <span class="author-block"><sup>1</sup> Korea Advanced Institute of Science and Technology, Republic of Korea</span>
+            <br>
+            <span class="author-block"><sup>2</sup> 42dot Inc., Republic of Korea</span>
+          </div>
+
+          
+          <div class="column has-text-centered">
+            <div class="publication-links">
+              <span class="link-block">
+                <a href="." class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="ai ai-arxiv"></i>
+                  </span>
+                  <span>arXiv</span>
+                </a>
+              </span>
+              <!-- <span class="link-block">
+                <a href=""
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fas fa-file-pdf"></i>
+                  </span>
+                  <span>Paper</span>
+                </a>
+              </span> -->
+              <!-- <span class="link-block">
+                <a href="https://github.com/kaistmm/fregrad"
+                   class="external-link button is-normal is-rounded is-dark">
+                  <span class="icon">
+                      <i class="fab fa-github"></i>
+                  </span>
+                  <span>Code</span>
+                  </a>
+              </span> -->
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- <section class="hero teaser">
+  <div class="container is-max-desktop">
+    <div class="hero-body">
+      <img src="static/fregrad.gif">
+      <h2 class="subtitle has-text-centered">
+        <span class="dnerf"> FreGrad gradually remove noise from wavelet features
+      </h2>
+    </div>
+  </div>
+</section> -->
+
+
+<section class="section">
+  <div class="container is-max-desktop">
+    <!-- Abstract. -->
+    <div class="columns is-centered has-text-centered">
+      <div class="column is-four-fifths">
+        <h2 class="title is-3">Abstract</h2>
+        <div class="content has-text-justified">
+          <p>
+            The goal of this work is to generate natural speech in multiple languages while maintaining the same speaker identity, a task known as cross-lingual speech synthesis. 
+            A main challenge of cross-lingual speech synthesis is the language-speaker entanglement problem, which causes the quality of cross-lingual systems to lag behind that of intra-lingual systems.
+            In this letter, we propose CrossSpeech++, which effectively disentangles language and speaker information and greatly improves the quality of cross-lingual speech synthesis. 
+            To this end, we break the complex speech generation pipeline into two simple components: language-dependent and speaker-dependent generators.
+            The language-dependent generator produces linguistic variations that are not biased by specific speaker attributes.
+            On the other hand, the speaker-dependent generator models acoustic variations that characterize speaker identity. 
+            By handling each type of information in separate modules, our method can effectively disentangle language and speaker representation.
+            We conducted extensive experiments using both subjective and objective metrics. 
+            The experimental results demonstrate that CrossSpeech++ achieves significant improvements in cross-lingual speech synthesis, outperforming existing methods by a large margin.
+        </p>
+        </div>
+      </div>
+    </div>
+    <!--/ Abstract. -->
+  </div>
+</section>
+
+
+<section class="section">
+  <div class="content">
+    <h2 class="title is-3">Audio Samples</h2>
+    <p>
+      
+    </p>
+    <table >
+      <thead>
+        <tr>
+            <td align="center"><b>Ground Truth</b><br>
+            </td>
+            <td align="center"><b>Vocoded</b><br>
+            </td>
+            <td align="center"><b>FP</b><br>
+            </td>
+            <td align="center"><b>FP + DAT</b><br>
+            </td>
+            <td align="center"><b>FP + DAT + $\mathcal{L}_{reg}$</b><br>
+            </td>
+            <td align="center"><b>CrossSpeech</b><br>
+            </td>
+            <td align="center"><b>CrossSpeech++</b><br><b>(Ours)</b><br>
+            </td>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; * Reference <b>English</b> speaker
+          </td>
+        </tr>
+        
+      </tbody>
+      <tbody>
+        <td align="center">
+          <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/en.wav"></audio>
+        </td>
+      </tbody>
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; - <b>English Text:</b> <i>It was a bit of a shock.</i>
+          </td>
+        </tr>
+      </tbody>
+      <tbody>
+          <tr>
+              <td align="center">
+                <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/en_text/gt/p311_128.wav"></audio>
+              </td>
+              <td align="center">
+                <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/en_text/vocoded/p311_128_vocoded.wav"></audio>
+              </td>
+              <td align="center">
+                <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/en_text/fp/p311_128.wav"></audio>
+              </td>
+              <td align="center"> 
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/en_text/fpdat/p311_128.wav"></audio>
+              </td>
+              <td align="center">
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/en_text/fpdatlreg/p311_128.wav"></audio>
+              </td>
+              <td align="center"> 
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/en_text/crossspeech/p311_128.wav"></audio>
+              </td>
+              <td align="center">
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/en_text/proposed/p311_128.wav"></audio>
+              </td>
+          </tr>
+      </tbody>
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; - <b>Korean Text:</b> <i>어떤 영상을 유튜브로 틀어드릴까요?</i>
+          </td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr>
+            <td align="center">
+              $-$
+            </td>
+            <td align="center">
+              $-$
+            </td>
+            <td align="center">
+              <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/ko_text/fp/0555_G1A2E7_KBH_001028_p311.wav"></audio>
+            </td>
+            <td align="center"> 
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/ko_text/fpdat/0555_G1A2E7_KBH_001028_p311.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/ko_text/fpdatlreg/0555_G1A2E7_KBH_001028_p311.wav"></audio>
+            </td>
+            <td align="center"> 
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/ko_text/crossspeech/0555_G1A2E7_KBH_001028_p311.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/ko_text/proposed/0555_G1A2E7_KBH_001028_p311.wav"></audio>
+            </td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; - <b>Chinese Text:</b> <i>邓小平与撒切尔会晤。</i>
+          </td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr>
+            <td align="center">
+              $-$
+            </td>
+            <td align="center">
+              $-$
+            </td>
+            <td align="center">
+              <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/zh_text/fp/000004_p311.wav"></audio>
+            </td>
+            <td align="center"> 
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/zh_text/fpdat/000004_p311.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/zh_text/fpdatlreg/000004_p311.wav"></audio>
+            </td>
+            <td align="center"> 
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/zh_text/crossspeech/000004_p311.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/zh_text/proposed/000004_p311.wav"></audio>
+            </td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; - <b>Japanese Text:</b> <i>原告の主張は、いずれも失当である。</i>
+          </td>
+        </tr>
+      </tbody>
+      <tbody>
+          <tr>
+              <td align="center">
+                $-$
+              </td>
+              <td align="center">
+                $-$
+              </td>
+              <td align="center">
+                <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/ja_text/fp/PRECEDENT130_025_p311.wav"></audio>
+              </td>
+              <td align="center"> 
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/ja_text/fpdat/PRECEDENT130_025_p311.wav"></audio>
+              </td>
+              <td align="center">
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/ja_text/fpdatlreg/PRECEDENT130_025_p311.wav"></audio>
+              </td>
+              <td align="center"> 
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/ja_text/crossspeech/PRECEDENT130_025_p311.wav"></audio>
+              </td>
+              <td align="center">
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/en/ja_text/proposed/PRECEDENT130_025_p311.wav"></audio>
+              </td>
+          </tr>
+          <tr></tr>
+      </tbody>
+
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; * Reference <b>Korean</b> speaker
+          </td>
+        </tr>
+        
+      </tbody>
+      <tbody>
+        <td align="center">
+          <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/ko.wav"></audio>
+        </td>
+      </tbody>
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; - <b>English Text:</b> <i>Well, it did last time, he was reminded.</i>
+          </td>
+        </tr>
+      </tbody>
+      <tbody>
+          <tr>
+              <td align="center">
+                $-$
+              </td>
+              <td align="center">
+                $-$
+              </td>
+              <td align="center">
+                <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/en_text/fp/p311_303_KJH.wav"></audio>
+              </td>
+              <td align="center"> 
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/en_text/fpdat/p311_303_KJH.wav"></audio>
+              </td>
+              <td align="center">
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/en_text/fpdatlreg/p311_303_KJH.wav"></audio>
+              </td>
+              <td align="center"> 
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/en_text/crossspeech/p311_303_KJH.wav"></audio>
+              </td>
+              <td align="center">
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/en_text/proposed/p311_303_KJH.wav"></audio>
+              </td>
+          </tr>
+      </tbody>
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; - <b>Korean Text:</b> <i>교과서 몇 쪽까지 배웠나 알려드릴게요.</i>
+          </td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr>
+            <td align="center">
+              <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/ko_text/gt/0937_G1A4E7_KJH_001402.wav"></audio>
+            </td>
+            <td align="center">
+              <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/ko_text/vocoded/0937_G1A4E7_KJH_001402.wav"></audio>
+            </td>
+            <td align="center">
+              <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/ko_text/fp/0937_G1A4E7_KJH_001402_intra.wav"></audio>
+            </td>
+            <td align="center"> 
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/ko_text/fpdat/0937_G1A4E7_KJH_001402_intra.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/ko_text/fpdatlreg/0937_G1A4E7_KJH_001402_intra.wav"></audio>
+            </td>
+            <td align="center"> 
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/ko_text/crossspeech/0937_G1A4E7_KJH_001402_intra.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/ko_text/proposed/0937_G1A4E7_KJH_001402_intra.wav"></audio>
+            </td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; - <b>Chinese Text:</b> <i>卡尔普陪外孙玩滑梯。</i>
+          </td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr>
+            <td align="center">
+              $-$
+            </td>
+            <td align="center">
+              $-$
+            </td>
+            <td align="center">
+              <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/zh_text/fp/000001_KJH.wav"></audio>
+            </td>
+            <td align="center"> 
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/zh_text/fpdat/000001_KJH.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/zh_text/fpdatlreg/000001_KJH.wav"></audio>
+            </td>
+            <td align="center"> 
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/zh_text/crossspeech/000001_KJH.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/zh_text/proposed/000001_KJH.wav"></audio>
+            </td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; - <b>Japanese Text:</b> <i>この前探った時は、途中に瘢痕の隆起があったので、ついそこが行きどまりだとばかり思って、ああ云ったんですが、</i>
+          </td>
+        </tr>
+      </tbody>
+      <tbody>
+          <tr>
+              <td align="center">
+                $-$
+              </td>
+              <td align="center">
+                $-$
+              </td>
+              <td align="center">
+                <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/ja_text/fp/meian_0000_KJH.wav"></audio>
+              </td>
+              <td align="center"> 
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/ja_text/fpdat/meian_0000_KJH.wav"></audio>
+              </td>
+              <td align="center">
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/ja_text/fpdatlreg/meian_0000_KJH.wav"></audio>
+              </td>
+              <td align="center"> 
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/ja_text/crossspeech/meian_0000_KJH.wav"></audio>
+              </td>
+              <td align="center">
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ko/ja_text/proposed/meian_0000_KJH.wav"></audio>
+              </td>
+          </tr>
+          <tr></tr>
+      </tbody>
+
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; * Reference <b>Chinese</b> speaker
+          </td>
+        </tr>
+        
+      </tbody>
+      <tbody>
+        <td align="center">
+          <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/cn.wav"></audio>
+        </td>
+      </tbody>
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; - <b>English Text:</b> <i>The highest rate is in Glasgow.</i>
+          </td>
+        </tr>
+      </tbody>
+      <tbody>
+          <tr>
+              <td align="center">
+                $-$
+              </td>
+              <td align="center">
+                $-$
+              </td>
+              <td align="center">
+                <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/en_text/fp/p311_174_databaker.wav"></audio>
+              </td>
+              <td align="center"> 
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/en_text/fpdat/p311_174_databaker.wav"></audio>
+              </td>
+              <td align="center">
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/en_text/fpdatlreg/p311_174_databaker.wav"></audio>
+              </td>
+              <td align="center"> 
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/en_text/crossspeech/p311_174_databaker.wav"></audio>
+              </td>
+              <td align="center">
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/en_text/proposed/p311_174_databaker.wav"></audio>
+              </td>
+          </tr>
+      </tbody>
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; - <b>Korean Text:</b > <i>보기 기능을 실행시켜 즐겨찾기를 찾아보겠습니다.</i>
+          </td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr>
+            <td align="center">
+              $-$
+            </td>
+            <td align="center">
+              $-$
+            </td>
+            <td align="center">
+              <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/ko_text/fp/0555_G1A2E7_KBH_000558_cross_databaker.wav"></audio>
+            </td>
+            <td align="center"> 
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/ko_text/fpdat/0555_G1A2E7_KBH_000558_cross_databaker.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/ko_text/fpdatlreg/0555_G1A2E7_KBH_000558_cross_databaker.wav"></audio>
+            </td>
+            <td align="center"> 
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/ko_text/crossspeech/0555_G1A2E7_KBH_000558_cross_databaker.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/ko_text/proposed/0555_G1A2E7_KBH_000558_cross_databaker.wav"></audio>
+            </td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; - <b>Chinese Text:</b> <i>假语村言别再拥抱我。</i>
+          </td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr>
+            <td align="center">
+              <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/zh_text/gt/000002.wav"></audio>
+            </td>
+            <td align="center">
+              <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/zh_text/vocoded/000002.wav"></audio>
+            </td>
+            <td align="center">
+              <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/zh_text/fp/000002_intra.wav"></audio>
+            </td>
+            <td align="center"> 
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/zh_text/fpdat/000002_intra.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/zh_text/fpdatlreg/000002_intra.wav"></audio>
+            </td>
+            <td align="center"> 
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/zh_text/crossspeech/000002_intra.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/zh_text/proposed/000002_intra.wav"></audio>
+            </td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; - <b>Japanese Text:</b> <i>治療期間を、三から六か月に限定して、認められるべきである。</i>
+          </td>
+        </tr>
+      </tbody>
+      <tbody>
+          <tr>
+              <td align="center">
+                $-$
+              </td>
+              <td align="center">
+                $-$
+              </td>
+              <td align="center">
+                <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/ja_text/fp/PRECEDENT130_006_cross_databaker.wav"></audio>
+              </td>
+              <td align="center"> 
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/ja_text/fpdat/PRECEDENT130_006_cross_databaker.wav"></audio>
+              </td>
+              <td align="center">
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/ja_text/fpdatlreg/PRECEDENT130_006_cross_databaker.wav"></audio>
+              </td>
+              <td align="center"> 
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/ja_text/crossspeech/PRECEDENT130_006_cross_databaker.wav"></audio>
+              </td>
+              <td align="center">
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/zh/ja_text/proposed/PRECEDENT130_006_cross_databaker.wav"></audio>
+              </td>
+          </tr>
+          <tr></tr>
+      </tbody>
+
+
+
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; * Reference <b>Japanese</b> speaker
+          </td>
+        </tr>
+        
+      </tbody>
+      <tbody>
+        <td align="center">
+          <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/ja.wav"></audio>
+        </td>
+      </tbody>
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; - <b>English Text:</b> <i>I'm sure everyone will be delighted for them.</i>
+          </td>
+        </tr>
+      </tbody>
+      <tbody>
+          <tr>
+              <td align="center">
+                $-$
+              </td>
+              <td align="center">
+                $-$
+              </td>
+              <td align="center">
+                <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/en_text/fp/p334_130_cross_JSUT.wav"></audio>
+              </td>
+              <td align="center"> 
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/en_text/fpdat/p334_130_cross_JSUT.wav"></audio>
+              </td>
+              <td align="center">
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/en_text/fpdatlreg/p334_130_cross_JSUT.wav"></audio>
+              </td>
+              <td align="center"> 
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/en_text/crossspeech/p334_130_cross_JSUT.wav"></audio>
+              </td>
+              <td align="center">
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/en_text/proposed/p334_130_cross_JSUT.wav"></audio>
+              </td>
+          </tr>
+      </tbody>
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; - <b>Korean Text:</b> <i>설교 빼고는 없으십니다.</i>
+          </td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr>
+            <td align="center">
+              $-$
+            </td>
+            <td align="center">
+              $-$
+            </td>
+            <td align="center">
+              <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/ko_text/fp/0555_G1A2E7_KBH_001364_cross_JSUT.wav"></audio>
+            </td>
+            <td align="center"> 
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/ko_text/fpdat/0555_G1A2E7_KBH_001364_cross_JSUT.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/ko_text/fpdatlreg/0555_G1A2E7_KBH_001364_cross_JSUT.wav"></audio>
+            </td>
+            <td align="center"> 
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/ko_text/crossspeech/0555_G1A2E7_KBH_001364_cross_JSUT.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/ko_text/proposed/0555_G1A2E7_KBH_001364_cross_JSUT.wav"></audio>
+            </td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; - <b>Chinese Text:</b> <i>假语村言别再拥抱我。</i>
+          </td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr>
+            <td align="center">
+              $-$
+            </td>
+            <td align="center">
+              $-$
+            </td>
+            <td align="center">
+              <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/zh_text/fp/000002_cross_JSUT.wav"></audio>
+            </td>
+            <td align="center"> 
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/zh_text/fpdat/000002_cross_JSUT.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/zh_text/fpdatlreg/000002_cross_JSUT.wav"></audio>
+            </td>
+            <td align="center"> 
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/zh_text/crossspeech/000002_cross_JSUT.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/zh_text/proposed/000002_cross_JSUT.wav"></audio>
+            </td>
+        </tr>
+      </tbody>
+      <tbody>
+        <tr>
+          <td colspan="7">
+            &nbsp;&nbsp;&nbsp;&nbsp; - <b>Japanese Text:</b> <i>電気伝導度の測定方法は、例えば次のようにして行う。</i>
+          </td>
+        </tr>
+      </tbody>
+      <tbody>
+          <tr>
+              <td align="center">
+                <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/ja_text/gt/PRECEDENT130_001.wav"></audio>
+              </td>
+              <td align="center">
+                <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/ja_text/vocoded/PRECEDENT130_001.wav"></audio>
+              </td>
+              <td align="center">
+                <audio id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/ja_text/fp/PRECEDENT130_001_intra.wav"></audio>
+              </td>
+              <td align="center"> 
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/ja_text/fpdat/PRECEDENT130_001_intra.wav"></audio>
+              </td>
+              <td align="center">
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/ja_text/fpdatlreg/PRECEDENT130_001_intra.wav"></audio>
+              </td>
+              <td align="center"> 
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/ja_text/crossspeech/PRECEDENT130_001_intra.wav"></audio>
+              </td>
+              <td align="center">
+                <audio  id="player" controls="" style="width:11vw;" preload="auto"><source src="static/audio/ja/ja_text/proposed/PRECEDENT130_001_intra.wav"></audio>
+              </td>
+          </tr>
+          <tr></tr>
+      </tbody>
+
+
+
+    </table>
+  </div>
+</section>
+
+
+<!-- 
+<section class="section">
+  <div class="content">
+    <h2 class="title is-3">Ablation studies for quality</h2>
+    <p>
+    </p>
+    <table >
+      <thead>
+        <tr>
+            <td align="center"><b>Proposed</b><br>
+            </td>
+            <td align="center"><b><i>w/o</i> MDSLN</b><br>
+            </td>
+            <td align="center"><b><i>w/o</i> LDV</b><br>
+            </td>
+            <td align="center"><b><i>w/o</i> LA</b><br>
+            </td>
+            <td align="center"><b><i>w/o</i> Perturb</b><br>
+            </td>
+            <td align="center"><b><i>w/o</i> SDV</b><br>
+            </td>
+        </tr>
+      </thead>
+      
+      
+      
+      <tbody>
+        <tr>
+            <td align="center">
+              <audio id="player" controls=""><source src="static/FREGRAD_cmos_samples/our/LJ003-0331.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls=""><source src="static/FREGRAD_cmos_samples/no_freq_block/LJ003-0331.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls=""><source src="static/FREGRAD_cmos_samples/no_sep_prior/LJ003-0331.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls=""><source src="static/FREGRAD_cmos_samples/no_zero_snr/LJ003-0331.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls=""><source src="static/FREGRAD_cmos_samples/no_L_mag/LJ003-0331.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls=""><source src="static/FREGRAD_cmos_samples/no_L_mag/LJ003-0331.wav"></audio>
+            </td>
+        </tr>
+      </tbody>
+
+      <tbody>
+        <tr>
+            <td align="center">
+              <audio id="player" controls=""><source src="static/FREGRAD_cmos_samples/our/LJ004-0107.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls=""><source src="static/FREGRAD_cmos_samples/no_freq_block/LJ004-0107.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls=""><source src="static/FREGRAD_cmos_samples/no_sep_prior/LJ004-0107.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls=""><source src="static/FREGRAD_cmos_samples/no_zero_snr/LJ004-0107.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls=""><source src="static/FREGRAD_cmos_samples/no_L_mag/LJ004-0107.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls=""><source src="static/FREGRAD_cmos_samples/no_L_mag/LJ004-0107.wav"></audio>
+            </td>
+        </tr>
+      </tbody>
+
+      <tbody>
+        <tr>
+            <td align="center">
+              <audio id="player" controls=""><source src="static/FREGRAD_cmos_samples/our/LJ005-0057.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls=""><source src="static/FREGRAD_cmos_samples/no_freq_block/LJ005-0057.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls=""><source src="static/FREGRAD_cmos_samples/no_sep_prior/LJ005-0057.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls=""><source src="static/FREGRAD_cmos_samples/no_zero_snr/LJ005-0057.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls=""><source src="static/FREGRAD_cmos_samples/no_L_mag/LJ005-0057.wav"></audio>
+            </td>
+            <td align="center">
+              <audio  id="player" controls=""><source src="static/FREGRAD_cmos_samples/no_L_mag/LJ005-0057.wav"></audio>
+            </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section> -->
+
+
+<footer class="footer">
+  <div class="container">
+    <div class="content has-text-centered">
+      <a class="icon-link"
+         href="./static/videos/nerfies_paper.pdf">
+        <i class="fas fa-file-pdf"></i>
+      </a>
+      <a class="icon-link" href="https://github.com/keunhong" class="external-link" disabled>
+        <i class="fab fa-github"></i>
+      </a>
+    </div>
+    <div class="columns is-centered">
+      <div class="column is-8">
+        <div class="content">
+          <p>
+            This website is licensed under a <a rel="license"
+                                                href="http://creativecommons.org/licenses/by-sa/4.0/">Creative
+            Commons Attribution-ShareAlike 4.0 International License</a>.
+          </p>
+          <p>
+            This means you are free to borrow the <a
+              href="https://github.com/nerfies/nerfies.github.io">source code</a> of this website,
+            we just ask that you link back to this page in the footer.
+            Please remember to remove the analytics code included in the header of the website which
+            you do not want on your website.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>
